@@ -2,32 +2,118 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 
-class CounterController extends GetxController{
-  int _counter = 0;
+class CounterModel {
+  int _count = 0;
+
+  int get count => _count;
+
+  void increment() {
+    _count++;
+  }
+
+  void decrement() {
+    _count--;
+  }
+
+  void reset() {
+    _count = 0;
+  }
+}
+
+class CounterViewModel extends GetxController {
+  final CounterModel _model = CounterModel();
+
+  final _counter = 0.obs;
+
+  int get counter => _counter.value;
+
+  String get counterStatus => _counter.value >= 0 ? 'Positive' : 'Negative';
 
   @override
-  void onInit() {
+  void onInit(){
     super.onInit();
   }
 
   @override
-  void onClose(){
+  void onClose() {
     super.onClose();
   }
 
   void increment() {
-    _counter++;
-    update();
+    _model.increment();
+    _counter.value = _model.count;
   }
 
   void decrement() {
-    _counter--;
-    update();
+    _model.decrement();
+    _counter.value = _model.count;
   }
 
   void setZero() {
-    _counter = 0;
-    update();
+    _model.reset();
+    _counter.value = _model.count;
+  }
+}
+
+class CounterView extends StatelessWidget{
+  final String title;
+
+  const CounterView({Key? key, required this.title}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: GetBuilder<CounterViewModel>(
+          init: CounterViewModel(),
+          builder: (viewModel) => CounterContent(viewModel: viewModel),
+      )
+    );
+  }
+}
+
+class CounterContent extends StatelessWidget{
+  final CounterViewModel viewModel;
+
+  const CounterContent({Key? key, required this.viewModel}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Text(
+            'You have pushed the button this many times:',
+          ),
+          Obx(() => Text(
+            '${viewModel.counter}',
+            style: Theme.of(context).textTheme.headlineMedium,
+          )),
+          Obx(() => Text(
+            'Counter Status: ${viewModel.counterStatus}',
+            style: Theme.of(context).textTheme.titleMedium,
+          )),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: viewModel.increment,
+            child: const Text('Increment'),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: viewModel.decrement,
+            child: const Text('Decrement'),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: viewModel.setZero,
+            child: const Text('Set to Zero'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -36,74 +122,17 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  // This widget is the root of your application.
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      home: const MyHomePage(title: 'GetX Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatelessWidget{
-  const MyHomePage({super.key, required this.title});
-  final String title;
-  @override
-  Widget build(BuildContext context){
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
+    return GetMaterialApp(
+      title: 'Flutter MVVM Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
-      body: GetBuilder(
-          init: CounterController(),
-          builder: (_) {
-            return MyWidget();
-          })
+      home: const CounterView(title: 'MVVM Counter with GetX'),
     );
   }
 }
 
-class MyWidget extends StatelessWidget{
-  @override
-  Widget build(BuildContext context) {
-    return GetBuilder<CounterController>(
-      builder: (controller) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Text(
-                'You have pushed the button this many times:',
-              ),
-              Text(
-                '${controller._counter}',
-                style: Theme
-                    .of(context)
-                    .textTheme
-                    .headlineMedium,
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    controller.increment();
-                  },
-                  child: Text('increment')),
-              ElevatedButton(
-                  onPressed: () {
-                    controller.decrement();
-                  },
-                  child: Text('decrement')),
-              ElevatedButton(
-                  onPressed: () {
-                    controller.setZero();
-                  },
-                  child: Text('set to zero')),
-            ],
-          ),
-
-        );
-      }
-       );
-      }
-  }
