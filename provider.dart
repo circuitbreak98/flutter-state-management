@@ -77,29 +77,29 @@ class CounterService {
   }
 }
 
-class CounterViewModel extends ChangeNotifier {  // Changed from GetxController
+class CounterViewModel extends ChangeNotifier {
   final CounterService _service;
-  int _counter = 0;  // Changed from _counter.obs
-  bool _isLoading = false;  // Changed from _isLoading.obs
+  int _counter = 0;
+  bool _isLoading = false;
 
   CounterViewModel(this._service) {
-    loadCounter();  // Moved from onInit to constructor
+    loadCounter();
   }
 
-  int get counter => _counter;  // Changed from _counter.value
-  bool get isLoading => _isLoading;  // Changed from _isLoading.value
+  int get counter => _counter;
+  bool get isLoading => _isLoading;
   String get counterStatus => _counter >= 0 ? 'Positive' : 'Negative';
 
   Future<void> loadCounter() async {
-    _isLoading = true;  // Changed from _isLoading.value = true
+    _isLoading = true;
     notifyListeners();
     try {
       await _service.loadSavedCounter();
-      _counter = _service.count;  // Changed from _counter.value
+      _counter = _service.count;
     } catch (e) {
-      debugPrint('Failed to load counter value');  // Changed from Get.snackbar
+      debugPrint('Failed to load counter value');
     } finally {
-      _isLoading = false;  // Changed from _isLoading.value = false
+      _isLoading = false;
       notifyListeners();
     }
   }
@@ -158,7 +158,7 @@ class CounterView extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
       ),
-      body: Consumer<CounterViewModel>(  // Changed from GetBuilder
+      body: Consumer<CounterViewModel>(
         builder: (context, viewModel, child) => CounterContent(viewModel: viewModel),
       ),
     );
@@ -172,7 +172,6 @@ class CounterContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Remove Obx and use regular Consumer
     return Center(
       child: viewModel.isLoading
           ? const CircularProgressIndicator()
@@ -215,13 +214,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
 
-  // Create all instances
+
   final repository = CounterRepository(prefs);
   final service = CounterService(repository);
   final viewModel = CounterViewModel(service);
 
   runApp(
-    ChangeNotifierProvider.value(  // Changed from Get.put
+    ChangeNotifierProvider.value(
       value: viewModel,
       child: const MyApp(),
     ),
@@ -233,7 +232,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(  // Changed from GetMaterialApp
+    return MaterialApp(  
       title: 'Flutter MVVM Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
